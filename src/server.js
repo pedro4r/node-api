@@ -36,7 +36,26 @@
 
 //Cabeçalhos (Requisição/resposta) = Metadados
 
-//HTTP Status Code
+// 3 formas do front-end enviar informações para o back-end
+//Query Parameters: ==> URL Stateful ==> Filtros, paginação, não obrigatórios
+//Route Parameters ==> Identificação de recurso
+//Request Body ==> Envio de informações de um formulário (usa o HTTPs) ==> não fica na URL
+
+// Query Parameters são parametros 
+// nomedados que a gente envia no proprio endereco 
+// da requisição. Exemplo:
+// http:localhost:3333/users?userId=1&name=Diego
+
+//Route Parameters
+// Parâmetros não nomedados que também ficam na rota. Exemplo:
+// GET http:localhost:3333/user/1
+// Nesse caso daria para entender que estamos buscando o usuario com ID = 1
+// DELETE http:localhost:3333/user/1
+// Nesse caso daria para entender que estamos querendo deletar o usuario com ID = 1
+
+//Request Body
+// POST http://localhost:3333/users
+
 import http from 'node:http'
 import { json } from './middlewares/json.js'
 import { Database } from './database.js'
@@ -50,13 +69,13 @@ const server = http.createServer(async (req, res) => {
   await json(req,res)
 
   const route = routes.find(route => {
-    return route.method === method && route.path === url
+    return route.method === method && route.path.test(url)
   })
 
   if(route) {
+    const routeParams = req.url.match(route.path)
     return route.handler(req, res)
   }
-  console.log(route)
 
   return res.writeHead(404).end()
 })
